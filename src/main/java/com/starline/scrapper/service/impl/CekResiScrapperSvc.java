@@ -1,10 +1,12 @@
 package com.starline.scrapper.service.impl;
 
 import com.starline.scrapper.config.WebDriverPool;
+import com.starline.scrapper.exceptions.DataNotFoundException;
 import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
 import com.starline.scrapper.model.dto.ScrappingRequest;
 import com.starline.scrapper.service.ScrapperService;
+import com.starline.scrapper.utils.SeleniumUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -40,7 +42,7 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequest, Cek
             String trackingUrl = "https://cekresi.com/?v=wi1&noresi=" + payload.getTrackingNumber();
             driver.get(trackingUrl);
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
             // Click CEKRESI button
             WebElement cekresiBtn = wait.until(ExpectedConditions.elementToBeClickable(
@@ -48,13 +50,16 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequest, Cek
             cekresiBtn.click();
 
             // Select courier
-            WebElement courierBtn = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//a[contains(@onclick, \"setExp('" + payload.getCourierCode() + "')\")]")));
+            WebElement courierBtn = SeleniumUtils.waitUntilOrThrow(wait,
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//a[contains(@onclick, \"setExp('" + payload.getCourierCode() + "')\")]")),
+                    () -> new DataNotFoundException("Please Check Your Tracking Number or Courier Code"));
             courierBtn.click();
 
             // Expand journey section
-            WebElement accordion = wait.until(ExpectedConditions.presenceOfElementLocated(
-                    By.xpath("//a[contains(text(),'Lihat perjalanan paket')]")));
+            WebElement accordion = SeleniumUtils.waitUntilOrThrow(wait,
+                    ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(text(),'Lihat perjalanan paket')]")),
+                    () -> new DataNotFoundException("Tracking Data Not Found"));
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", accordion);
             Thread.sleep(1000);
             accordion.click();
@@ -84,8 +89,10 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequest, Cek
 
             return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "No data found", 200);
 
-        }  finally {
+        } finally {
             if (driver != null) driverPool.release(driver);
         }
     }
+
+
 }

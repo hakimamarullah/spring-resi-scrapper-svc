@@ -3,9 +3,11 @@ package com.starline.scrapper.controller;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.starline.scrapper.annotations.LogResponse;
+import com.starline.scrapper.exceptions.ApiException;
 import com.starline.scrapper.model.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.TimeoutException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -102,6 +104,30 @@ public class GlobalControllerAdvice {
 
         return response.toResponseEntity();
     }
+
+    @ExceptionHandler({TimeoutException.class})
+    public ResponseEntity<ApiResponse<String>> seleniumTimeoutHandler(TimeoutException ex) {
+        log.error(ex.getMessage(), ex);
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setCode(500);
+        response.setMessage("Something went wrong during scrapping");
+        response.setData(ex.getClass().getCanonicalName());
+
+        return response.toResponseEntity();
+    }
+
+    @ExceptionHandler({ApiException.class})
+    public ResponseEntity<ApiResponse<String>> apiExceptionHandler(ApiException ex) {
+        log.error(ex.getMessage(), ex);
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setCode(ex.getHttpCode());
+        response.setMessage(ex.getMessage());
+        response.setData(ex.getClass().getCanonicalName());
+
+        return response.toResponseEntity();
+    }
+
+
 
 }
 

@@ -42,7 +42,7 @@ public class JNEScrapperSvc implements ScrapperService<ScrappingRequest, CekResi
             driver = driverPool.borrow();
             driver.get("https://www.jne.co.id/en/tracking-package");
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
             // ✅ Use the visible tagify input (not hidden input[name='cek-resi'])
             WebElement visibleInput = wait.until(ExpectedConditions.presenceOfElementLocated(
@@ -88,7 +88,7 @@ public class JNEScrapperSvc implements ScrapperService<ScrappingRequest, CekResi
             }
 
             // ✅ Extract last timeline entry
-            new WebDriverWait(driver, Duration.ofSeconds(15))
+            new WebDriverWait(driver, Duration.ofSeconds(10))
                     .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("ul.timeline.widget li")));
 
             Document doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
