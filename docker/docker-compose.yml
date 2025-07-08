@@ -1,0 +1,63 @@
+services:
+  selenium-hub:
+    image: selenium/hub:4.21.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+    networks:
+      - grid
+
+  chrome-node-1:
+    image: selenium/node-chrome:4.21.0
+    shm_size: 2g
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    networks:
+      - grid
+
+  chrome-node-2:
+    image: selenium/node-chrome:4.21.0
+    shm_size: 2g
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    networks:
+      - grid
+
+  chrome-node-3:
+    image: selenium/node-chrome:4.21.0
+    shm_size: 2g
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    networks:
+      - grid
+
+  scrapper-svc:
+    image: scrapper-svc:beta
+    container_name: scrapper-svc
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - JAVA_OPTS=-Dwebdriver.remote.url=http://selenium-hub:4444/wd/hub
+      - LOG_FILE_PATH=/tmp/logs
+    depends_on:
+      - selenium-hub
+    networks:
+      - grid
+
+
+networks:
+  grid:
+    driver: bridge
