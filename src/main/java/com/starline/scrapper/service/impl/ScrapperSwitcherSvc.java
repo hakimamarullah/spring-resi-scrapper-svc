@@ -26,7 +26,7 @@ public class ScrapperSwitcherSvc implements ScrapperSwitcher {
         try {
             return (ScrapperService<? extends ScrappingRequest, ?>) applicationContext.getBean(formatBeanName(courierCode));
         } catch (Exception e) {
-            log.warn("Failed to get bean for courierCode {}: {}", courierCode, e.getMessage(), e);
+            log.warn("Failed to get bean for courierCode {}: {}", courierCode, e.getMessage());
         }
 
 
