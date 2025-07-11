@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -31,8 +32,12 @@ public class WebDriverPool {
     @PostConstruct
     public void init() {
         pool = new ArrayBlockingQueue<>(poolSize);
+        log.info("🚀 Creating WebDriver pool of size {} Selenium Remote URL: {}", poolSize, seleniumRemoteUrl);
         for (int i = 0; i < poolSize; i++) {
             WebDriver driver = createDriver(i);
+            if (Objects.isNull(driver)) {
+                continue;
+            }
             allDrivers.add(driver);
             pool.add(driver);
         }
@@ -62,7 +67,8 @@ public class WebDriverPool {
             log.info("🚀 Starting WebDriver #{}", index);
             return new RemoteWebDriver(URI.create(seleniumRemoteUrl).toURL(), options);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to start WebDriver: " + e.getMessage(), e);
+           log.warn("Failed to create driver: {}", e.getMessage());
+           return null;
         }
     }
 
