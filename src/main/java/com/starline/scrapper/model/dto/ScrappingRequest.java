@@ -1,15 +1,16 @@
 package com.starline.scrapper.model.dto;
 
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class ScrappingRequest {
 
+    @NotBlank(message = "Tracking number is required")
     private String trackingNumber;
 
-    @NotNull(message = "Courier code is required")
+    @NotBlank(message = "Courier code is required")
     private String courierCode;
 
     private String phoneLast5;

@@ -43,19 +43,19 @@ services:
     networks:
       - grid
 
-  scrapper-svc:
-    image: scrapper-svc:beta
-    container_name: scrapper-svc
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=local
-      - JAVA_OPTS=-Dwebdriver.remote.url=http://selenium-hub:4444/wd/hub
-      - LOG_FILE_PATH=/tmp/logs
-    depends_on:
-      - selenium-hub
-    networks:
-      - grid
+  # scrapper-svc:
+  #   image: scrapper-svc:beta
+  #   container_name: scrapper-svc
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=local
+  #     - JAVA_OPTS=-Dwebdriver.remote.url=http://selenium-hub:4444/wd/hub
+  #     - LOG_FILE_PATH=/tmp/logs
+  #   depends_on:
+  #     - selenium-hub
+  #   networks:
+  #     - grid
 
 
 networks:
