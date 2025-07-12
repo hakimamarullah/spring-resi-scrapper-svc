@@ -17,9 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.MalformedURLException;
-import java.nio.charset.MalformedInputException;
-
 @RestController
 @RequestMapping("/scrapper")
 @RequiredArgsConstructor
@@ -32,9 +29,10 @@ public class ScrappingController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(value = "/tracking", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse<CekResiScrapResponse>> scrap(@RequestBody @Valid ScrappingRequest payload) throws InterruptedException, MalformedURLException, MalformedInputException {
+    public ResponseEntity<ApiResponse<CekResiScrapResponse>> scrap(@RequestBody @Valid ScrappingRequest payload) throws Exception {
         ScrapperService<ScrappingRequest, Object> service = (ScrapperService<ScrappingRequest, Object>) serviceSwitcher.getScrapperService(payload.getCourierCode());
-        ApiResponse<CekResiScrapResponse> response = mapper.convertValue(service.scrap(payload), new TypeReference<>() {
+        var result = service.scrap(payload);
+        ApiResponse<CekResiScrapResponse> response = mapper.convertValue(result, new TypeReference<>() {
         });
         return response.toResponseEntity();
 
