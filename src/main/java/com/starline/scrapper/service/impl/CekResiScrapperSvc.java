@@ -5,6 +5,7 @@ import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
 import com.starline.scrapper.model.dto.ScrappingRequest;
 import com.starline.scrapper.service.ScrapperService;
+import com.starline.scrapper.service.WebDriverFactory;
 import com.starline.scrapper.utils.SeleniumUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import java.net.MalformedURLException;
 import java.time.Duration;
 import java.util.Objects;
 
@@ -30,61 +32,67 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CekResiScrapperSvc implements ScrapperService<ScrappingRequest, CekResiScrapResponse> {
 
-    private final WebDriver driver;
+    private final WebDriverFactory webDriverFactory;
 
 
     @Override
-    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws InterruptedException {
-        String trackingUrl = "https://cekresi.com/?v=wi1&noresi=" + payload.getTrackingNumber();
-        driver.get(trackingUrl);
+    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws InterruptedException, MalformedURLException {
+        WebDriver driver = null;
+        try {
+            driver = webDriverFactory.createDriver();
+            String trackingUrl = "https://cekresi.com/?v=wi1&noresi=" + payload.getTrackingNumber();
+            driver.get(trackingUrl);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        // Click CEKRESI button
-        WebElement cekresiBtn = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[contains(text(),'CEKRESI')]")));
-        cekresiBtn.click();
+            // Click CEKRESI button
+            WebElement cekresiBtn = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//button[contains(text(),'CEKRESI')]")));
+            cekresiBtn.click();
 
-        // Select courier
-        WebElement courierBtn = SeleniumUtils.waitUntilOrThrow(wait,
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath("//a[contains(@onclick, \"setExp('" + payload.getCourierCode() + "')\")]")),
-                () -> new DataNotFoundException("Please Check Your Tracking Number or Courier Code"));
-        courierBtn.click();
+            // Select courier
+            WebElement courierBtn = SeleniumUtils.waitUntilOrThrow(wait,
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//a[contains(@onclick, \"setExp('" + payload.getCourierCode() + "')\")]")),
+                    () -> new DataNotFoundException("Please Check Your Tracking Number or Courier Code"));
+            courierBtn.click();
 
-        // Expand journey section
-        WebElement accordion = SeleniumUtils.waitUntilOrThrow(wait,
-                ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(text(),'Lihat perjalanan paket')]")),
-                () -> new DataNotFoundException("Tracking Data Not Found"));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", accordion);
-        Thread.sleep(1000);
-        accordion.click();
-        Thread.sleep(2000);
+            // Expand journey section
+            WebElement accordion = SeleniumUtils.waitUntilOrThrow(wait,
+                    ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(text(),'Lihat perjalanan paket')]")),
+                    () -> new DataNotFoundException("Tracking Data Not Found"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", accordion);
+            Thread.sleep(1000);
+            accordion.click();
+            Thread.sleep(2000);
 
-        // Parse HTML
-        Document doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
-        Elements rows = doc.select(".panel-group .panel:last-of-type tr");
+            // Parse HTML
+            Document doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
+            Elements rows = doc.select(".panel-group .panel:last-of-type tr");
 
-        if (rows.size() >= 2) {
-            Element first = rows.get(1);
-            Element last = rows.getLast();
+            if (rows.size() >= 2) {
+                Element first = rows.get(1);
+                Element last = rows.getLast();
 
-            String firstTimestamp = Objects.requireNonNull(first.select("td").first()).text();
-            String firstCheckpoint = first.select("td").get(1).text();
+                String firstTimestamp = Objects.requireNonNull(first.select("td").first()).text();
+                String firstCheckpoint = first.select("td").get(1).text();
 
-            String lastTimestamp = Objects.requireNonNull(last.select("td").first()).text();
-            String lastCheckpoint = last.select("td").get(1).text();
+                String lastTimestamp = Objects.requireNonNull(last.select("td").first()).text();
+                String lastCheckpoint = last.select("td").get(1).text();
 
-            boolean lastIsLatest = lastTimestamp.compareTo(firstTimestamp) >= 0;
+                boolean lastIsLatest = lastTimestamp.compareTo(firstTimestamp) >= 0;
 
-            return ApiResponse.setSuccess(CekResiScrapResponse.builder()
-                    .timestamp(lastIsLatest ? lastTimestamp : firstTimestamp)
-                    .checkpoint(lastIsLatest ? lastCheckpoint : firstCheckpoint)
-                    .build());
+                return ApiResponse.setSuccess(CekResiScrapResponse.builder()
+                        .timestamp(lastIsLatest ? lastTimestamp : firstTimestamp)
+                        .checkpoint(lastIsLatest ? lastCheckpoint : firstCheckpoint)
+                        .build());
+            }
+
+            return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "No data found", 200);
+
+        } finally {
+            webDriverFactory.silentQuit(driver);
         }
-
-        return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "No data found", 200);
-
 
     }
 

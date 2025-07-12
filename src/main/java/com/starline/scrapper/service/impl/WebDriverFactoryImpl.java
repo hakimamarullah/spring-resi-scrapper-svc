@@ -1,25 +1,25 @@
-package com.starline.scrapper.config;
+package com.starline.scrapper.service.impl;
 
+import com.starline.scrapper.service.WebDriverFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 
-@Component
+@Service
 @Slf4j
-public class WebDriverPool {
+public class WebDriverFactoryImpl implements WebDriverFactory {
 
     @Value("${webdriver.remote.url:http://localhost:4444/wd/hub}")
     private String seleniumRemoteUrl;
 
-    @Bean
-    public WebDriver mainDriver() throws MalformedURLException {
+
+    public WebDriver createDriver() throws MalformedURLException {
         ChromeOptions options = new ChromeOptions();
         options.addArguments(
                 "--headless=new",
@@ -31,6 +31,18 @@ public class WebDriverPool {
         );
 
         return new RemoteWebDriver(URI.create(seleniumRemoteUrl).toURL(), options);
+    }
+
+
+    @Override
+    public void silentQuit(WebDriver driver) {
+        if (driver != null) {
+            try {
+                driver.quit();
+            } catch (Exception e) {
+                log.warn("Failed to quit driver {}", e.getMessage());
+            }
+        }
     }
 
 }
