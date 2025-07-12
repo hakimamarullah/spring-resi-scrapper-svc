@@ -4,8 +4,3 @@ spring:
   config:
     import: configserver:${SPRING_CLOUD_CONFIG_URI:http://localhost:8888}
 
-
-# Logging
-logging:
-  config: classpath:log4j2-spring.xml
-

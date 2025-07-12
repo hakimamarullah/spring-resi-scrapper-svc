@@ -1,7 +1,6 @@
 package com.starline.scrapper.service.impl;
 
 
-import com.starline.scrapper.config.WebDriverPool;
 import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
 import com.starline.scrapper.model.dto.ScrappingRequest;
@@ -32,84 +31,79 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JNEScrapperSvc implements ScrapperService<ScrappingRequest, CekResiScrapResponse> {
 
-    private final WebDriverPool driverPool;
+    private final WebDriver driver;
 
 
     @Override
     public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws InterruptedException {
-        WebDriver driver = null;
+        driver.get("https://www.jne.co.id/en/tracking-package");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        // ✅ Use the visible tagify input (not hidden input[name='cek-resi'])
+        WebElement visibleInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.cssSelector(".tagify__input")
+        ));
+        visibleInput.click();
+        visibleInput.sendKeys(payload.getTrackingNumber());
+        visibleInput.sendKeys(Keys.ENTER);
+
+        // Optional: Update hidden field as fallback (no wait here!)
         try {
-            driver = driverPool.borrow();
-            driver.get("https://www.jne.co.id/en/tracking-package");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
-            // ✅ Use the visible tagify input (not hidden input[name='cek-resi'])
-            WebElement visibleInput = wait.until(ExpectedConditions.presenceOfElementLocated(
-                    By.cssSelector(".tagify__input")
-            ));
-            visibleInput.click();
-            visibleInput.sendKeys(payload.getTrackingNumber());
-            visibleInput.sendKeys(Keys.ENTER);
-
-            // Optional: Update hidden field as fallback (no wait here!)
-            try {
-                WebElement hiddenInput = driver.findElement(By.name("cek-resi"));
-                ((JavascriptExecutor) driver).executeScript(
-                        "arguments[0].value = arguments[1];", hiddenInput, payload.getTrackingNumber());
-            } catch (NoSuchElementException ignored) {
-                log.warn("Hidden input[name='cek-resi'] not found. Continuing without JS injection.");
-            }
-
-            WebElement trackBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("lacak-pengiriman")));
-            trackBtn.click();
-
-            WebElement seeMore = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.see-more")));
-            seeMore.click();
-
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("num1")))
-                    .sendKeys(Character.toString(payload.getPhoneLast5().charAt(0)));
-            driver.findElement(By.id("num2")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(1)));
-            driver.findElement(By.id("num3")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(2)));
-            driver.findElement(By.id("num4")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(3)));
-            driver.findElement(By.id("num5")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(4)));
-
-            driver.findElement(By.id("send-question")).click();
-
-            // 🔄 Wait for tab switch
-            WebDriverWait tabWait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            tabWait.until(d -> d.getWindowHandles().size() > 1);
-            List<String> tabs = driver.getWindowHandles().stream().toList();
-            if (tabs.size() > 1) {
-                driver.switchTo().window(tabs.get(1));
-            } else {
-                log.warn("No new tab opened.");
-                return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "Verification tab not opened.", 500);
-            }
-
-            // ✅ Extract last timeline entry
-            new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("ul.timeline.widget li")));
-
-            Document doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
-            Elements events = doc.select("ul.timeline.widget li");
-
-
-            if (!events.isEmpty()) {
-                Element last = events.last();
-                String timestamp = getText(last, ".byline span");
-                String checkpoint = getText(last, "h2.title a");
-                return ApiResponse.setResponse(CekResiScrapResponse.builder()
-                        .timestamp(timestamp)
-                        .checkpoint(checkpoint)
-                        .build(), 200);
-            } else {
-                return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "No timeline entry found.", 200);
-            }
-
-        } finally {
-            if (driver != null) driverPool.release(driver);
+            WebElement hiddenInput = driver.findElement(By.name("cek-resi"));
+            ((JavascriptExecutor) driver).executeScript(
+                    "arguments[0].value = arguments[1];", hiddenInput, payload.getTrackingNumber());
+        } catch (NoSuchElementException ignored) {
+            log.warn("Hidden input[name='cek-resi'] not found. Continuing without JS injection.");
         }
+
+        WebElement trackBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("lacak-pengiriman")));
+        trackBtn.click();
+
+        WebElement seeMore = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.see-more")));
+        seeMore.click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("num1")))
+                .sendKeys(Character.toString(payload.getPhoneLast5().charAt(0)));
+        driver.findElement(By.id("num2")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(1)));
+        driver.findElement(By.id("num3")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(2)));
+        driver.findElement(By.id("num4")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(3)));
+        driver.findElement(By.id("num5")).sendKeys(Character.toString(payload.getPhoneLast5().charAt(4)));
+
+        driver.findElement(By.id("send-question")).click();
+
+        // 🔄 Wait for tab switch
+        WebDriverWait tabWait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        tabWait.until(d -> d.getWindowHandles().size() > 1);
+        List<String> tabs = driver.getWindowHandles().stream().toList();
+        if (tabs.size() > 1) {
+            driver.switchTo().window(tabs.get(1));
+        } else {
+            log.warn("No new tab opened.");
+            return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "Verification tab not opened.", 500);
+        }
+
+        // ✅ Extract last timeline entry
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("ul.timeline.widget li")));
+
+        Document doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
+        Elements events = doc.select("ul.timeline.widget li");
+
+
+        if (!events.isEmpty()) {
+            Element last = events.last();
+            String timestamp = getText(last, ".byline span");
+            String checkpoint = getText(last, "h2.title a");
+            return ApiResponse.setResponse(CekResiScrapResponse.builder()
+                    .timestamp(timestamp)
+                    .checkpoint(checkpoint)
+                    .build(), 200);
+        } else {
+            return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "No timeline entry found.", 200);
+        }
+
+
     }
 
     private String getText(Element element, String cssQuery) {
