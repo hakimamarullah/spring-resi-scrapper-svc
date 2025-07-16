@@ -1,5 +1,6 @@
 package com.starline.scrapper.service.impl;
 
+import com.starline.scrapper.config.ScrapperProps;
 import com.starline.scrapper.exceptions.DataNotFoundException;
 import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
@@ -34,16 +35,17 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequest, Cek
 
     private final WebDriverFactory webDriverFactory;
 
+    private final ScrapperProps props;
 
     @Override
     public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws InterruptedException, MalformedURLException {
         WebDriver driver = null;
         try {
             driver = webDriverFactory.createDriver();
-            String trackingUrl = "https://cekresi.com/?v=wi1&noresi=" + payload.getTrackingNumber();
+            String trackingUrl = props.getCekResiUrl() + payload.getTrackingNumber();
             driver.get(trackingUrl);
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(props.getDriverWaitSeconds()));
 
             // Click CEKRESI button
             WebElement cekresiBtn = wait.until(ExpectedConditions.elementToBeClickable(

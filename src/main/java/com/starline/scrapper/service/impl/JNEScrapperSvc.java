@@ -1,6 +1,7 @@
 package com.starline.scrapper.service.impl;
 
 
+import com.starline.scrapper.config.ScrapperProps;
 import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
 import com.starline.scrapper.model.dto.ScrappingRequest;
@@ -35,15 +36,16 @@ public class JNEScrapperSvc implements ScrapperService<ScrappingRequest, CekResi
 
     private final WebDriverFactory webDriverFactory;
 
+    private final ScrapperProps props;
 
     @Override
-    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws InterruptedException, MalformedURLException {
+    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws MalformedURLException {
         WebDriver driver = null;
         try {
             driver = webDriverFactory.createDriver();
-            driver.get("https://www.jne.co.id/en/tracking-package");
+            driver.get(props.getJneUrl());
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(props.getDriverWaitSeconds()));
 
             // ✅ Use the visible tagify input (not hidden input[name='cek-resi'])
             WebElement visibleInput = wait.until(ExpectedConditions.presenceOfElementLocated(
