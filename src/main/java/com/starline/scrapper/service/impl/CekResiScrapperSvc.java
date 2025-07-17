@@ -45,6 +45,7 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent
             String trackingUrl = props.getCekResiUrl() + payload.getTrackingNumber();
             driver.get(trackingUrl);
 
+            log.info("CREATING DRIVER WAIT WITH TIMEOUT: {}s URL: {} COURIER: {}", props.getDriverWaitSeconds(), trackingUrl, payload.getCourierCode());
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(props.getDriverWaitSeconds()));
 
             // Click CEKRESI button
@@ -64,7 +65,7 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent
                     ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(text(),'Lihat perjalanan paket')]")),
                     () -> new DataNotFoundException("Tracking Data Not Found"));
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", accordion);
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             accordion.click();
             Thread.sleep(2000);
 
@@ -92,11 +93,7 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent
 
             return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "No data found", 200);
 
-        } catch (Exception e) {
-            log.warn("Failed to scrap for: {} Reason: {}", payload.getTrackingNumber(), e.getMessage());
-            Thread.currentThread().interrupt();
-            throw e;
-        } finally {
+        }  finally {
             webDriverFactory.silentQuit(driver);
         }
 

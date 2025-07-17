@@ -45,6 +45,7 @@ public class JNEScrapperSvc implements ScrapperService<ScrappingRequestEvent, Ce
             driver = webDriverFactory.createDriver();
             driver.get(props.getJneUrl());
 
+            log.info("CREATING DRIVER WAIT FOR JNE WITH TIMEOUT: {}s URL: {}", props.getDriverWaitSeconds(), props.getJneUrl());
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(props.getDriverWaitSeconds()));
 
             // ✅ Use the visible tagify input (not hidden input[name='cek-resi'])
