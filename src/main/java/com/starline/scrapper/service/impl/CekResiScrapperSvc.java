@@ -92,6 +92,10 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent
 
             return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "No data found", 200);
 
+        } catch (Exception e) {
+            log.warn("Failed to scrap for: {} Reason: {}", payload.getTrackingNumber(), e.getMessage());
+            Thread.currentThread().interrupt();
+            throw e;
         } finally {
             webDriverFactory.silentQuit(driver);
         }

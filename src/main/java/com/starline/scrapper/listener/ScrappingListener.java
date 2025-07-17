@@ -40,6 +40,7 @@ public class ScrappingListener {
         var service = (ScrapperService<ScrappingRequestEvent, Object>) scrapperSwitcher.getScrapperService(payload.getCourierCode());
         ApiResponse<CekResiScrapResponse> result = mapper.convertValue(service.scrap(payload), new TypeReference<>() {});
         if (!result.is2xxSuccessful()) {
+            log.warn("FAILED scrapping request: {}", mapper.writeValueAsString(payload));
             throw new ScrappingFailedException(result.getMessage());
         }
         var data = result.getData();
