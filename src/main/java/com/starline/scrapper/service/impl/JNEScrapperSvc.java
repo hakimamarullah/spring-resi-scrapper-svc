@@ -4,7 +4,7 @@ package com.starline.scrapper.service.impl;
 import com.starline.scrapper.config.ScrapperProps;
 import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
-import com.starline.scrapper.model.dto.ScrappingRequest;
+import com.starline.scrapper.model.dto.ScrappingRequestEvent;
 import com.starline.scrapper.service.ScrapperService;
 import com.starline.scrapper.service.WebDriverFactory;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +32,14 @@ import java.util.Optional;
 @Service("jneScrapper")
 @Slf4j
 @RequiredArgsConstructor
-public class JNEScrapperSvc implements ScrapperService<ScrappingRequest, CekResiScrapResponse> {
+public class JNEScrapperSvc implements ScrapperService<ScrappingRequestEvent, CekResiScrapResponse> {
 
     private final WebDriverFactory webDriverFactory;
 
     private final ScrapperProps props;
 
     @Override
-    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws MalformedURLException {
+    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequestEvent payload) throws MalformedURLException {
         WebDriver driver = null;
         try {
             driver = webDriverFactory.createDriver();

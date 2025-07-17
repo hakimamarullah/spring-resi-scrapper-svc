@@ -1,7 +1,7 @@
 package com.starline.scrapper.service.impl;
 
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
-import com.starline.scrapper.model.dto.ScrappingRequest;
+import com.starline.scrapper.model.dto.ScrappingRequestEvent;
 import com.starline.scrapper.service.ScrapperService;
 import com.starline.scrapper.service.ScrapperSwitcher;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +18,13 @@ public class ScrapperSwitcherSvc implements ScrapperSwitcher {
 
     private final ApplicationContext applicationContext;
 
-    private final ScrapperService<ScrappingRequest, CekResiScrapResponse> scrapperDefault;
+    private final ScrapperService<ScrappingRequestEvent, CekResiScrapResponse> scrapperDefault;
 
     @Override
-    public ScrapperService<? extends ScrappingRequest, ?> getScrapperService(String courierCode) {
+    public ScrapperService<? extends ScrappingRequestEvent, ?> getScrapperService(String courierCode) {
         log.info("GET scrapper service for: {}", courierCode);
         try {
-            return (ScrapperService<? extends ScrappingRequest, ?>) applicationContext.getBean(formatBeanName(courierCode));
+            return (ScrapperService<? extends ScrappingRequestEvent, ?>) applicationContext.getBean(formatBeanName(courierCode));
         } catch (Exception e) {
             log.warn("Failed to get bean for courierCode {}: {}", courierCode, e.getMessage());
         }

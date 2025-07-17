@@ -1,8 +1,8 @@
 package com.starline.scrapper.service;
 
-import com.starline.scrapper.model.dto.ScrappingRequest;
+import com.starline.scrapper.model.dto.ScrappingRequestEvent;
 
 public interface ScrapperSwitcher {
 
-    ScrapperService<? extends ScrappingRequest, ?> getScrapperService(String courierCode);
+    ScrapperService<? extends ScrappingRequestEvent, ?> getScrapperService(String courierCode);
 }

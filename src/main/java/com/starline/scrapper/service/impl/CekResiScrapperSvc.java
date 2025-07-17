@@ -4,7 +4,7 @@ import com.starline.scrapper.config.ScrapperProps;
 import com.starline.scrapper.exceptions.DataNotFoundException;
 import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
-import com.starline.scrapper.model.dto.ScrappingRequest;
+import com.starline.scrapper.model.dto.ScrappingRequestEvent;
 import com.starline.scrapper.service.ScrapperService;
 import com.starline.scrapper.service.WebDriverFactory;
 import com.starline.scrapper.utils.SeleniumUtils;
@@ -31,14 +31,14 @@ import java.util.Objects;
 @Primary
 @Slf4j
 @RequiredArgsConstructor
-public class CekResiScrapperSvc implements ScrapperService<ScrappingRequest, CekResiScrapResponse> {
+public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent, CekResiScrapResponse> {
 
     private final WebDriverFactory webDriverFactory;
 
     private final ScrapperProps props;
 
     @Override
-    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequest payload) throws InterruptedException, MalformedURLException {
+    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequestEvent payload) throws InterruptedException, MalformedURLException {
         WebDriver driver = null;
         try {
             driver = webDriverFactory.createDriver();

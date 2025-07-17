@@ -58,5 +58,8 @@ public class ApiResponse<T> implements Serializable {
 
     @JsonIgnore
     public ResponseEntity<ApiResponse<T>> toResponseEntity() { return ResponseEntity.status(getHttpStatus()).body(this); }
+
+    @JsonIgnore
+    public boolean is2xxSuccessful() { return getHttpStatus().is2xxSuccessful(); }
 }
 
