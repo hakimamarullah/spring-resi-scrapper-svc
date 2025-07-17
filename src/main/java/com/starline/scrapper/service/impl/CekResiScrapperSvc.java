@@ -63,14 +63,21 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent
                     () -> new DataNotFoundException("Please Check Your Tracking Number or Courier Code"));
             courierBtn.click();
 
+            log.info("WAITING FOR ACCORDION: {}", payload.getTrackingNumber());
             // Step 3: Wait and interact with accordion using Actions API
-            WebElement accordion = SeleniumUtils.waitUntilOrThrow(wait,
-                    ExpectedConditions.visibilityOfElementLocated(
-                            By.cssSelector("a.accordion-toggle[href='#collapseTwo']")),
-                    () -> new DataNotFoundException("Tracking Data Not Found"));
+            try {
+                WebElement accordion = SeleniumUtils.waitUntilOrThrow(wait,
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.cssSelector("a.accordion-toggle[href='#collapseTwo']")),
+                        () -> new DataNotFoundException("Tracking Data Not Found"));
 
-            // Move to accordion and click via Actions
-            actions.moveToElement(accordion).pause(Duration.ofMillis(500)).click().perform();
+                // Move to accordion and click via Actions
+                actions.moveToElement(accordion).pause(Duration.ofMillis(800)).click().perform();
+
+            } catch (Exception e) {
+                log.info("PAGE SOURCE DEBUG 00887: {}", driver.getPageSource());
+                throw e;
+            }
 
             // Step 4: Parse HTML after interaction
             Document doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
