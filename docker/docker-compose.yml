@@ -43,6 +43,20 @@ services:
     networks:
       - grid
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    networks:
+      - grid
+
   # scrapper-svc:
   #   image: scrapper-svc:beta
   #   container_name: scrapper-svc

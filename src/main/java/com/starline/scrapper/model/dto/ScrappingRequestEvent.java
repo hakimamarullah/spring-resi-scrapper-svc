@@ -14,4 +14,6 @@ public class ScrappingRequest {
     private String courierCode;
 
     private String phoneLast5;
+
+    private Long userId;
 }
