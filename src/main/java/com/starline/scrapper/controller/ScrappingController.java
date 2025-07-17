@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.starline.scrapper.annotations.LogRequestResponse;
 import com.starline.scrapper.model.dto.ApiResponse;
 import com.starline.scrapper.model.dto.CekResiScrapResponse;
-import com.starline.scrapper.model.dto.ScrappingRequest;
+import com.starline.scrapper.model.dto.ScrappingRequestEvent;
 import com.starline.scrapper.service.ScrapperService;
 import com.starline.scrapper.service.ScrapperSwitcher;
 import jakarta.validation.Valid;
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.MalformedURLException;
 
 @RestController
 @RequestMapping("/scrapper")
@@ -29,8 +31,8 @@ public class ScrappingController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(value = "/tracking", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse<CekResiScrapResponse>> scrap(@RequestBody @Valid ScrappingRequest payload) throws Exception {
-        ScrapperService<ScrappingRequest, Object> service = (ScrapperService<ScrappingRequest, Object>) serviceSwitcher.getScrapperService(payload.getCourierCode());
+    public ResponseEntity<ApiResponse<CekResiScrapResponse>> scrap(@RequestBody @Valid ScrappingRequestEvent payload) throws MalformedURLException, InterruptedException {
+        ScrapperService<ScrappingRequestEvent, Object> service = (ScrapperService<ScrappingRequestEvent, Object>) serviceSwitcher.getScrapperService(payload.getCourierCode());
         var result = service.scrap(payload);
         ApiResponse<CekResiScrapResponse> response = mapper.convertValue(result, new TypeReference<>() {
         });

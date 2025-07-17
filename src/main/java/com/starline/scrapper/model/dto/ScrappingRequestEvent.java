@@ -1,11 +1,12 @@
 package com.starline.scrapper.model.dto;
 
 
+import com.starline.scrapper.model.dto.event.enums.ScrappingType;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class ScrappingRequest {
+public class ScrappingRequestEvent {
 
     @NotBlank(message = "Tracking number is required")
     private String trackingNumber;
@@ -16,4 +17,8 @@ public class ScrappingRequest {
     private String phoneLast5;
 
     private Long userId;
+
+    private ScrappingType type;
+
+    private String additionalValue1;
 }
