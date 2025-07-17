@@ -15,9 +15,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.context.annotation.Primary;
@@ -38,38 +38,41 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent
     private final ScrapperProps props;
 
     @Override
-    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequestEvent payload) throws InterruptedException, MalformedURLException {
+    public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequestEvent payload) throws MalformedURLException {
         WebDriver driver = null;
         try {
             driver = webDriverFactory.createDriver();
             String trackingUrl = props.getCekResiUrl() + payload.getTrackingNumber();
             driver.get(trackingUrl);
 
-            log.info("CREATING DRIVER WAIT WITH TIMEOUT: {}s URL: {} COURIER: {}", props.getDriverWaitSeconds(), trackingUrl, payload.getCourierCode());
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(props.getDriverWaitSeconds()));
+            log.info("CREATING DRIVER WAIT WITH TIMEOUT: {}s URL: {} COURIER: {}",
+                    props.getDriverWaitSeconds(), trackingUrl, payload.getCourierCode());
 
-            // Click CEKRESI button
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(props.getDriverWaitSeconds()));
+            Actions actions = new Actions(driver);
+
+            // Step 1: Click CEKRESI button
             WebElement cekresiBtn = wait.until(ExpectedConditions.elementToBeClickable(
                     By.xpath("//button[contains(text(),'CEKRESI')]")));
             cekresiBtn.click();
 
-            // Select courier
+            // Step 2: Click on Courier Button
             WebElement courierBtn = SeleniumUtils.waitUntilOrThrow(wait,
                     ExpectedConditions.elementToBeClickable(
                             By.xpath("//a[contains(@onclick, \"setExp('" + payload.getCourierCode() + "')\")]")),
                     () -> new DataNotFoundException("Please Check Your Tracking Number or Courier Code"));
             courierBtn.click();
 
-            // Expand journey section
+            // Step 3: Wait and interact with accordion using Actions API
             WebElement accordion = SeleniumUtils.waitUntilOrThrow(wait,
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(text(),'Lihat perjalanan paket')]")),
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.cssSelector("a.accordion-toggle[href='#collapseTwo']")),
                     () -> new DataNotFoundException("Tracking Data Not Found"));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", accordion);
-            Thread.sleep(2000);
-            accordion.click();
-            Thread.sleep(2000);
 
-            // Parse HTML
+            // Move to accordion and click via Actions
+            actions.moveToElement(accordion).pause(Duration.ofMillis(500)).click().perform();
+
+            // Step 4: Parse HTML after interaction
             Document doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
             Elements rows = doc.select(".panel-group .panel:last-of-type tr");
 
@@ -96,8 +99,8 @@ public class CekResiScrapperSvc implements ScrapperService<ScrappingRequestEvent
         }  finally {
             webDriverFactory.silentQuit(driver);
         }
-
     }
+
 
 
 }
