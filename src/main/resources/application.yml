@@ -15,7 +15,6 @@ spring:
       eager-load:
         clients: scraper-puppeteer-svc
 
-log4j2:
-  configuration:
-    allowed-protocols: "file, https, jar, resource"
+logging:
+  config: classpath:log4j2-spring.xml
 

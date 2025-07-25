@@ -272,6 +272,13 @@
                                 <arg>-H:IncludeResources=log4j2-prod.xml</arg>
                                 <arg>-H:IncludeResources=log4j2-local.xml</arg>
                                 <arg>-H:IncludeResources=log4j2-spring.xml</arg>
+                                <arg>-H:IncludeResources=org/openqa/selenium/remote/.*</arg>
+                                <arg>-H:IncludeResources=org/openqa/selenium/.*</arg>
+                                <!-- Include other common Selenium resources -->
+                                <arg>-H:IncludeResources=org/openqa/selenium/support/.*</arg>
+                                <!-- If you need Chrome/Firefox driver resources -->
+                                <arg>-H:IncludeResources=.*chromedriver.*</arg>
+                                <arg>-H:IncludeResources=.*geckodriver.*</arg>
                                 <arg>-H:+GenerateBuildArtifactsFile</arg>
                                 <arg>-march=compatibility</arg>
                                 <arg>-H:+AddAllCharsets</arg>
