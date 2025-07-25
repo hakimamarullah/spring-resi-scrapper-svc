@@ -6,5 +6,14 @@ spring:
   output:
     ansi:
       enabled: always
+  cloud:
+    refresh:
+      enabled: false
+    loadbalancer:
+      eager-load:
+        clients: scraper-puppeteer-svc
 
+log4j2:
+  configuration:
+    allowed-protocols: "file, https, jar, resource"
 
