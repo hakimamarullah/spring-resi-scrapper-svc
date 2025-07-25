@@ -5,7 +5,7 @@
         <Property name="LOG_PATH">${env:LOG_FILE_PATH:-./logs}</Property>
         <Property name="LOG_SIZE">${env:LOG_FILE_SIZE:-50MB}</Property>
         <Property name="LOG_ROLLOVER">${env:LOG_ROLLOVER_COUNT:-10}</Property>
-        <Property name="APP_NAME">${spring:spring.application.name:-scrapper-local-svc}</Property>
+        <Property name="APP_NAME">${env:APP_NAME:-remind-pack-scraper-svc}</Property>
     </Properties>
 
     <Appenders>
