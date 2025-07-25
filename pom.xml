@@ -268,7 +268,6 @@
                                 <arg>-H:+ReportExceptionStackTraces</arg>
                                 <arg>-H:IncludeResources=log4j2.component.properties</arg>
                                 <arg>-H:IncludeResources=application.yml</arg>
-                                <arg>-H:IncludeResources=application-local.yml</arg>
                                 <arg>-H:IncludeResources=log4j2.xml</arg>
                                 <arg>-H:IncludeResources=log4j2-prod.xml</arg>
                                 <arg>-H:IncludeResources=log4j2-local.xml</arg>
