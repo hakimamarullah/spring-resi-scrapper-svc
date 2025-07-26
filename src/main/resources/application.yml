@@ -15,6 +15,34 @@ spring:
       eager-load:
         clients: scraper-puppeteer-svc
 
+otel:
+  traces:
+    exporter: none
+  metrics:
+    exporter: none
+  logs:
+    exporter: console
+  instrumentation:
+    micrometer:
+      enabled: true
+    http:
+      client:
+        emit-experimental-telemetry: true
+  propagators: "tracecontext,baggage,b3"
+
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    baggage:
+      correlation:
+        enabled: true
+    propagation:
+      produce: w3c,b3,b3_multi
+      consume: w3c
+
 logging:
   config: classpath:log4j2-spring.xml
 

@@ -1,8 +1,12 @@
 package com.starline.scrapper.exceptions;
 
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 
+@Setter
 @Getter
+@RegisterReflectionForBinding({ApiException.class})
 public class ApiException extends RuntimeException {
 
     protected int httpCode;
@@ -12,8 +16,4 @@ public class ApiException extends RuntimeException {
         this.httpCode = 500;
     }
 
-    public ApiException() {
-        super("Something went wrong");
-        this.httpCode = 500;
-    }
 }

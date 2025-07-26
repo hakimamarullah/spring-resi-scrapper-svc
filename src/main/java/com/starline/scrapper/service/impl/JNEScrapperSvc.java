@@ -42,6 +42,9 @@ public class JNEScrapperSvc implements ScrapperService<ScrappingRequestEvent, Ce
     public ApiResponse<CekResiScrapResponse> scrap(ScrappingRequestEvent payload) throws MalformedURLException {
         WebDriver driver = null;
         try {
+            if (Objects.isNull(payload.getPhoneLast5()) || payload.getPhoneLast5().isBlank()) {
+                return ApiResponse.setResponse(CekResiScrapResponse.builder().build(), "Phone number is required", 400);
+            }
             driver = webDriverFactory.createDriver();
             driver.get(props.getJneUrl());
 
