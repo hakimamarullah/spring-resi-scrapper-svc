@@ -42,7 +42,6 @@ management:
     propagation:
       produce: w3c,b3,b3_multi
       consume: w3c
-
 logging:
   config: classpath:log4j2-spring.xml
 
