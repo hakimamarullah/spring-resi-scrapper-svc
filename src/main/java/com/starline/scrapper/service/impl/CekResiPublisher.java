@@ -6,11 +6,15 @@ import com.starline.scrapper.service.RabbitPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@RegisterReflectionForBinding({
+        ScrappingResultEvent.class
+})
 public class CekResiPublisher implements RabbitPublisher {
 
     private final RabbitTemplate rabbitTemplate;

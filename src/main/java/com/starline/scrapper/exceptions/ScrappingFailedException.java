@@ -1,9 +1,12 @@
 package com.starline.scrapper.exceptions;
 
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
+
+@RegisterReflectionForBinding({ScrappingFailedException.class})
 public class ScrappingFailedException extends ApiException {
 
     public ScrappingFailedException(String message) {
         super(message);
-        this.httpCode = 500;
+        setHttpCode(500);
     }
 }
