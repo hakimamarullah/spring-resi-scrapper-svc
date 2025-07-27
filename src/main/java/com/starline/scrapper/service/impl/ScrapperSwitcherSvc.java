@@ -6,7 +6,6 @@ import com.starline.scrapper.service.ScrapperService;
 import com.starline.scrapper.service.ScrapperSwitcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,6 @@ public class ScrapperSwitcherSvc implements ScrapperSwitcher {
 
     private final ApplicationContext applicationContext;
 
-    @Qualifier("puppeteerScraper")
     private final ScrapperService<ScrappingRequestEvent, CekResiScrapResponse> scrapperDefault;
 
     @Override
