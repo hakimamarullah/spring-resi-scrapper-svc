@@ -7,6 +7,7 @@ import com.starline.scrapper.service.ScrapperSwitcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,13 @@ public class ScrapperSwitcherSvc implements ScrapperSwitcher {
 
     private final ApplicationContext applicationContext;
 
+    private final ScrapperService<ScrappingRequestEvent, CekResiScrapResponse> scraperDefault;
+
     @Qualifier("puppeteerScraper")
-    private final ScrapperService<ScrappingRequestEvent, CekResiScrapResponse> scrapperDefault;
+    private final ScrapperService<ScrappingRequestEvent, CekResiScrapResponse> scraperPuppeteer;
+
+    @Value("${scraper.puppeteer.enabled:false}")
+    private Boolean enabledPuppeteer;
 
     @Override
     public ScrapperService<? extends ScrappingRequestEvent, ?> getScrapperService(String courierCode) {
@@ -33,7 +39,7 @@ public class ScrapperSwitcherSvc implements ScrapperSwitcher {
 
 
         log.info("Falling back to default scrapper service for: {}", courierCode);
-        return scrapperDefault;
+        return Boolean.TRUE.equals(enabledPuppeteer) ? scraperPuppeteer : scraperDefault;
     }
 
     private String formatBeanName(String courierCode) {
